@@ -48,12 +48,15 @@ class Parser {
 
     struct ListNode {
         Types type;
+        Types type2;
+
         std::string value;
         std::vector<std::string> exclude = {"RM", "RD", "RS", "RF", "PC", "SP"};
         std::unique_ptr<ListNode> next;
 
-        ListNode(Types inptype, std::string invalue): type(inptype), value(invalue) {
+        ListNode(Types inptype, std::string invalue, Types intype2 = Types::INVALID_TYPE): type(inptype), value(invalue) {
             next = nullptr;
+            type2 = intype2;
         }
 
         ListNode() {
@@ -66,9 +69,9 @@ class Parser {
     };
 
     void insert(std::unique_ptr<ListNode> &head, std::string val,
-        Types type) {
+        Types type, Types type2 = Types::INVALID_TYPE) {
 
-        std::unique_ptr<ListNode> newNode = std::make_unique<ListNode>(type, val);
+        std::unique_ptr<ListNode> newNode = std::make_unique<ListNode>(type, val, type2);
 
         if (head == nullptr) {
             head = std::move(newNode);

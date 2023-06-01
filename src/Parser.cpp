@@ -35,7 +35,7 @@ Parser::Parser(std::string &filePath) {
         
 
     insert(ld, "", Types::REGISTER);
-    insert(ld, "", Types::NUMBER);
+    insert(ld, "", Types::NUMBER, Types::ADDRESS);
 
     insert(mv, "", Types::REGISTER);
     insert(mv, "", Types::REGISTER);
@@ -112,7 +112,7 @@ const Types Parser::getTypeFromToken(std::string &token) {
     } else if (is_hex_notation(token)) {
         return Types::ADDRESS;
     } else if (is_number(token)) {
-        return Types::NUMBER;
+        return Types::NUMBER; // also return Address because of hex conversion later
     } else {
         return Types::INVALID_TYPE;
     }
@@ -150,12 +150,13 @@ const std::string Parser::handleOpcode(const std::string &token) {
     while (cur != nullptr) {
         std::string curToken = cur->value;
         Types curType = cur->type;
+        Types curType2 = cur->type2;
 
         if ((curToken != "" && curToken == movingToken && curType == movingType) || 
-            (curToken == "" && curType == movingType)) {
+            (curToken == "" && (curType == movingType || curType2 == movingType))) {
 
             if (movingType == Types::NUMBER) {
-                currentNum += movingToken;
+                currentNum += uint8ToHex(std::stoi(movingToken));
             } else if (movingType == Types::ADDRESS) {
                 movingToken = movingToken.substr(2);
                 currentNum += movingToken;
