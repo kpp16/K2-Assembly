@@ -213,7 +213,7 @@ void Emulator::cycle() {
 
 void Emulator::printAllRegisters() {
     int i = 1;
-    for (uint8_t num: registers) {
+    for (auto &num: registers) {
         std::cout << "R" << i << ": " << uint16ToHexString(num) << std::endl << "\n";
         i++;
     }
