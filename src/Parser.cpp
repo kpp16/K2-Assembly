@@ -140,7 +140,7 @@ const std::string Parser::handleOpcode(const std::string &token) {
         {"WA", wa.get()}
     };
 
-    std::string currentNum = "0x";
+    std::string currentNum = "";
 
     ListNode*cur = opcodeSyntaxTable[token];
 
@@ -156,16 +156,19 @@ const std::string Parser::handleOpcode(const std::string &token) {
             (curToken == "" && (curType == movingType || curType2 == movingType))) {
 
             if (movingType == Types::NUMBER) {
-                currentNum += uint8ToHex(std::stoi(movingToken));
+                auto binaryString = uint8ToBinaryString(std::stoi(movingToken));
+                currentNum += binaryString;
             } else if (movingType == Types::ADDRESS) {
-                movingToken = movingToken.substr(2);
-                currentNum += movingToken;
+                auto binaryString = hexToBinaryString(movingToken);               
+                currentNum += binaryString;
             } else if (movingType == Types::OPCODE){
                 auto num = uint8ToHex(opcodeTable[movingToken]);
-                currentNum += num;
+                auto binaryString = hexToBinaryString(num, Types::OPCODE);               
+                currentNum += binaryString;
             } else if (movingType == Types::REGISTER) {
                 auto num = uint8ToHex(registerTable[movingToken]);
-                currentNum += num;
+                auto binaryString = hexToBinaryString(num, Types::REGISTER);
+                currentNum += binaryString;
             } else {
                 throw std::runtime_error("Invalid syntax: Invalid keyword/symbol");
             }
@@ -183,7 +186,16 @@ const std::string Parser::handleOpcode(const std::string &token) {
         }
     }
 
-    return currentNum;
+
+    int remBits = 16 - currentNum.size();
+
+    for (int i = 0; i < remBits; i++) {
+        currentNum += "0";
+    }
+
+    std::cout << "Current num: " << currentNum << "\n";
+
+    return binaryToHexString(currentNum);
 }
 
 const void Parser::interpret() {
@@ -194,7 +206,7 @@ const void Parser::interpret() {
         Types type = getTypeFromToken(token);
 
         if (type == Types::OPCODE) {
-            finalNum += handleOpcode(token) + "\n";
+            finalNum += "0x" + handleOpcode(token) + "\n";
         } else if (type == Types::EndOFFile) {
             break;
         } else {
@@ -203,4 +215,8 @@ const void Parser::interpret() {
     }
 
     std::cout << "Final string:\n" << finalNum << std::endl;
+
+    std::ofstream out("a.out");
+    out << finalNum;
+    
 }

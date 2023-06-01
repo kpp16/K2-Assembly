@@ -8,6 +8,7 @@
 #include <set>
 #include <unordered_map>
 #include <map>
+#include <bitset>
 
 enum Types {
     OPCODE,
@@ -36,6 +37,44 @@ class Parser {
         return !s.empty() && std::find_if(s.begin(), 
             s.end(), [](unsigned char c) { return !std::isdigit(c); }) == s.end();
     }
+
+    const std::string uint8ToBinaryString(uint8_t value) {
+        std::bitset<8> bits(value);
+        return bits.to_string();
+    }
+
+    const std::string hexToBinaryString(const std::string& hexString, Types type = Types::ADDRESS) {
+        // Convert hexadecimal string to unsigned integer
+        unsigned int intValue;
+        std::stringstream ss;
+        ss << std::hex << hexString;
+        ss >> intValue;
+
+        if (type == Types::REGISTER || type == Types::OPCODE) {
+            std::bitset<4> bits(intValue);
+            return bits.to_string();
+        } else {
+            std::bitset<8> bits(intValue);
+            return bits.to_string();
+        }
+    }
+
+    std::string binaryToHexString(const std::string& binaryString) {
+        std::bitset<16> bits(binaryString);
+        unsigned long long value = bits.to_ullong();
+
+        // Convert unsigned long long to hexadecimal string
+        std::stringstream ss;
+        ss << std::hex << value;
+        std::string hexString = ss.str();
+
+        // Ensure the output string has the correct length
+        if (hexString.length() % 2 != 0) {
+            hexString.insert(0, "0");
+        }
+
+        return hexString;
+    }    
 
     const std::string handleOpcode(const std::string &s);
 
